@@ -1,6 +1,17 @@
 var builder = WebApplication.CreateBuilder(args);
 
+// Obter a chave da Riot dos Secrets/configuração
+
+var riotApiKey = builder.configuration["Riot:ApiKey"]
+    ?? throw new InvalidIperationException("Riot:ApiKey não foi configurada nos USer Secrets!");
+
 // Add services to the container.
+
+
+// Registar o HttpClient configurado para o Riot API
+builder.Services.AddHttpClient("RiotClient", client => {
+    client.DefaultRequestHeaders.Add("X-Riot-TOken", riotApiKey);
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
