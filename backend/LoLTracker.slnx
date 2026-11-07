@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/LolTracker.Api/">
+    <Project Path="LolTracker.Api/LoLTracker.Api.csproj" />
+  </Folder>
+</Solution>
