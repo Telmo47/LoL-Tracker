@@ -15,7 +15,7 @@ public class TrackerController : ControllerBase
     private readonly IDistributedCache _cache;
 
     // O ASP.NET injeta a fábrica de HttpClients automaticamente no construtor
-    public TrackerController(IHttpClientFactory httpClientFactory)
+    public TrackerController(IHttpClientFactory httpClientFactory, IDistributedCache cache)
     {
         _httpClientFactory = httpClientFactory;
         _cache = cache;
@@ -99,7 +99,7 @@ public class TrackerController : ControllerBase
                 Console.WriteLine($"Erro ao descarregar a partida {matchId}: {ex.Message}");
             }
         });
-        
+
         var cacheOptions = new DistributedCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15)
@@ -110,7 +110,5 @@ public class TrackerController : ControllerBase
         // 3. Devolver as partidas descarregadas
         return Ok(matches);
 
-        // 4. Devolver a lista completa com as 20 partidas detalhadas
-        return Ok(matches);
     }
 }
