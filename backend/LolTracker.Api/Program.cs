@@ -14,6 +14,12 @@ builder.Services.AddHttpClient("RiotClient", client => {
 });
 
 builder.Services.AddControllers();
+
+// COnfigurar o Redis Cache
+builder.Services.AddStackExchangeRedisCache(option => {
+    option.Configuration = "localhost:6379";
+    option.InstanceName = "LolTracker_";
+});
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 

@@ -2,6 +2,8 @@ using System.Net;
 using System.Net.Http.Json;
 using LolTracker.Api.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace LolTracker.Api.Controllers;
 
@@ -10,11 +12,13 @@ namespace LolTracker.Api.Controllers;
 public class TrackerController : ControllerBase
 {
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IDistributedCache _cache;
 
     // O ASP.NET injeta a fábrica de HttpClients automaticamente no construtor
     public TrackerController(IHttpClientFactory httpClientFactory)
     {
         _httpClientFactory = httpClientFactory;
+        _cache = cache;
     }
 
     [HttpGet("summoner/{gameName}/{tagLine}")]
@@ -49,6 +53,15 @@ public class TrackerController : ControllerBase
     [HttpGet("matches/{puuid}")]
     public async Task<IActionResult> GetMatches(string puuid, [FromQuery] int count = 20)
     {
+        var cacheKey = $"matches_{puuid}_{count}";
+
+        var cachedMatchesJson = await _cache.GetStringAsync(cacheKey);
+        if (!string.IsNullOrEmpty(cachedMatchesJson))
+        {
+            var cachedMatches = JsonSerializer.Deserialize<List<MatchDto>>(cachedMatchesJson);
+            return Ok(cachedMatches);
+        }
+
         var client = _httpClientFactory.CreateClient("RiotClient");
 
         // 1. Obter a lista com os IDs das últimas partidas (máximo 20)
@@ -86,6 +99,14 @@ public class TrackerController : ControllerBase
                 Console.WriteLine($"Erro ao descarregar a partida {matchId}: {ex.Message}");
             }
         });
+        
+        var cacheOptions = new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15)
+        };
+        var jsonToCache = JsonSerializer.Serialize(matches);
+        await _cache.SetStringAsync(cacheKey, jsonToCache, cacheOptions);
+
         // 3. Devolver as partidas descarregadas
         return Ok(matches);
 
