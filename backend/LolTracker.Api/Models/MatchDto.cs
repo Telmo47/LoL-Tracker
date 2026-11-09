@@ -19,6 +19,7 @@ public record MatchInfoDto(
 );
 
 public record ParticipantDto(
+    [property: JsonPropertyName("teamId")] int TeamId,
     [property: JsonPropertyName("puuid")] string Puuid,
     [property: JsonPropertyName("summonerName")] string SummonerName,
     [property: JsonPropertyName("riotIdGameName")] string RiotIdGameName,
