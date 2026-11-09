@@ -4,6 +4,7 @@ using LolTracker.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
+using LolTracker.Api.Services;
 
 namespace LolTracker.Api.Controllers;
 
