@@ -10,7 +10,16 @@ public record SupportMetricsDto(
     double AvgWardsKilled,
     double AvgKda,
     List<ChampionStatDto> ChampionStats,
+    List<AdcSynergyDto> AdcSynergies, // <-- Novo campo com as sinergias
     List<MatchSummaryDto> MatchHistory
+);
+
+public record AdcSynergyDto(
+    string AdcChampionName,
+    int GamesPlayed,
+    int Wins,
+    int Losses,
+    double WinRate
 );
 
 public record ChampionStatDto(
@@ -26,6 +35,7 @@ public record ChampionStatDto(
 public record MatchSummaryDto(
     string MatchId,
     string ChampionName,
+    string? AdcChampionName, // <-- Guardado também quem foi o ADC nesta partida
     bool Win,
     int Kills,
     int Deaths,
