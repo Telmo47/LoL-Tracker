@@ -15,6 +15,9 @@ builder.Services.AddHttpClient("RiotClient", client => {
 
 builder.Services.AddControllers();
 
+// Registar o serviço de métricas de suporte
+builder.Services.AddScoped<LolTracker.Api.Services.ISupportMetricsService, LolTracker.Api.Services.SupportMetricsService>();
+
 // COnfigurar o Redis Cache
 builder.Services.AddStackExchangeRedisCache(option => {
     option.Configuration = "localhost:6379";

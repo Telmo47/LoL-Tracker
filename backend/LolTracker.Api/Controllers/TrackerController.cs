@@ -4,6 +4,7 @@ using LolTracker.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
+using LolTracker.Api.Services;
 
 namespace LolTracker.Api.Controllers;
 
@@ -13,12 +14,31 @@ public class TrackerController : ControllerBase
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IDistributedCache _cache;
+    private readonly ISupportMetricsService _supportService;
 
     // O ASP.NET injeta a fábrica de HttpClients automaticamente no construtor
-    public TrackerController(IHttpClientFactory httpClientFactory, IDistributedCache cache)
+    public TrackerController(IHttpClientFactory httpClientFactory, IDistributedCache cache, ISupportMetricsService supportService)
     {
         _httpClientFactory = httpClientFactory;
         _cache = cache;
+        _supportService = supportService;      
+    }
+
+    [HttpGet("support-metrics/{puuid}")]
+    public async Task<IActionResult> GetSupportMetrics(string puuid)
+    {
+        // 1. Aproveitamos a lógica que já tem no GetMatches (que lê do Redis se já existir!)
+        var matchesResult = await GetMatches(puuid, count: 20);
+        
+        if (matchesResult is not OkObjectResult okResult || okResult.Value is not IEnumerable<MatchDto> matches)
+        {
+            return StatusCode(500, new { message = "Não foi possível carregar as partidas para análise." });
+        }
+
+        // 2. O serviço calcula todas as métricas de Suporte
+        var metrics = _supportService.AnalyzeSupportPerformance(puuid, matches);
+
+        return Ok(metrics);
     }
 
     [HttpGet("summoner/{gameName}/{tagLine}")]
