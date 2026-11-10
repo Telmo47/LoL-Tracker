@@ -13,6 +13,17 @@ builder.Services.AddHttpClient("RiotClient", client => {
     client.DefaultRequestHeaders.Add("X-Riot-Token", riotApiKey);
 });
 
+// Configurar a política de CORS para o React (Vite na porta 5173)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddControllers();
 
 // Registar o serviço de métricas de suporte
@@ -35,6 +46,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseHttpsRedirection();
+
+// Ativar o CORS antes da autorização e controllers!
+app.UseCors("AllowReactApp");
 
 app.UseAuthorization();
 
