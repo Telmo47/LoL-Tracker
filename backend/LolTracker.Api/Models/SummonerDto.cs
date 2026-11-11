@@ -2,5 +2,20 @@ using System.Text.Json.Serialization;
 
 namespace LolTracker.Api.Models;
 
-public record SummonerDto([property: JsonPropertyName("id")] string Id, [property: JsonPropertyName("accountId")] string accountId, [property: JsonPropertyName("puuid")] string Puuid, [property: JsonPropertyName("profileIconId")] int ProfileIconId, [property: JsonPropertyName("summonerLevel")] long summonerLevel);
+public class SummonerDto
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
 
+    [JsonPropertyName("accountId")]
+    public string AccountId { get; set; } = string.Empty;
+
+    [JsonPropertyName("puuid")]
+    public string Puuid { get; set; } = string.Empty;
+
+    [JsonPropertyName("profileIconId")]
+    public int ProfileIconId { get; set; }
+
+    [JsonPropertyName("summonerLevel")]
+    public long SummonerLevel { get; set; }
+}

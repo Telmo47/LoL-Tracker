@@ -131,4 +131,57 @@ public class TrackerController : ControllerBase
         return Ok(matches);
 
     }
+
+[HttpGet("profile/{gameName}/{tagLine}/{puuid}")]
+public async Task<IActionResult> GetProfile(string gameName, string tagLine, string puuid)
+{
+    var client = _httpClientFactory.CreateClient("RiotClient");
+
+    try 
+    {
+        // 1. Obter os dados básicos do invocador (Ícone e Nível) diretamente do JSON que já sabemos que funciona
+        var summonerUrl = $"https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/{puuid}";
+        var summonerResponse = await client.GetAsync(summonerUrl);
+        
+        if (!summonerResponse.IsSuccessStatusCode) return NotFound(new { message = "Summoner não encontrado." });
+
+        var summonerJson = await summonerResponse.Content.ReadAsStringAsync();
+        using var document = JsonDocument.Parse(summonerJson);
+        var root = document.RootElement;
+        
+        var profileIconId = root.TryGetProperty("profileIconId", out var iconProp) ? iconProp.GetInt32() : 1;
+        var summonerLevel = root.TryGetProperty("summonerLevel", out var levelProp) ? levelProp.GetInt64() : 1;
+
+        // 2. Obter o League (Rank) usando diretamente o PUUID (Endpoint moderno da Riot)
+        var leagueUrl = $"https://euw1.api.riotgames.com/lol/league/v4/entries/by-puuid/{puuid}";
+        var leagueResponse = await client.GetAsync(leagueUrl);
+        
+        List<LeagueEntryDto>? leagues = null;
+        if (leagueResponse.IsSuccessStatusCode)
+        {
+            var rawLeagueJson = await leagueResponse.Content.ReadAsStringAsync();
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            leagues = JsonSerializer.Deserialize<List<LeagueEntryDto>>(rawLeagueJson, options);
+        }
+
+        var soloQueue = leagues?.FirstOrDefault(l => l.QueueType == "RANKED_SOLO_5x5");
+
+        // 3. Montar a resposta final com o teu Platina 4 merecido!
+        var profile = new ProfileDto(
+            GameName: gameName,
+            TagLine: tagLine,
+            ProfileIconId: profileIconId,
+            SummonerLevel: summonerLevel,
+            Tier: soloQueue?.Tier ?? "UNRANKED",
+            Rank: soloQueue?.Rank ?? "",
+            LeaguePoints: soloQueue?.LeaguePoints ?? 0
+        );
+
+        return Ok(profile);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { message = "Erro interno crítico", details = ex.Message });
+    }
+}
 }
