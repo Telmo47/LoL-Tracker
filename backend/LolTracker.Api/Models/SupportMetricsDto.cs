@@ -10,7 +10,7 @@ public record SupportMetricsDto(
     double AvgWardsKilled,
     double AvgKda,
     List<ChampionStatDto> ChampionStats,
-    List<AdcSynergyDto> AdcSynergies, // <-- Novo campo com as sinergias
+    List<AdcSynergyDto> AdcSynergies, 
     List<MatchSummaryDto> MatchHistory
 );
 

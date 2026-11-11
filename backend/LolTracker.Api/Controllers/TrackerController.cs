@@ -131,4 +131,38 @@ public class TrackerController : ControllerBase
         return Ok(matches);
 
     }
+
+    [HttpGet("profile/{gameName}/{tagLine}/{puuid}")]
+public async Task<IActionResult> GetProfile(string gameName, string tagLine, string puuid)
+{
+    var client = _httpClientFactory.CreateClient("RiotClient");
+
+
+    var summonerUrl = $"https://europe.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/{puuid}";
+    
+    
+    var summoner = await client.GetFromJsonAsync<SummonerDto>(summonerUrl);
+
+    var leagueUrl = $"https://europe.api.riotgames.com/lol/league/v4/entries/by-summoner/{summoner.Id}";
+    
+    
+    var leagues = await client.GetFromJsonAsync<List<LeagueEntryDto>>(leagueUrl);
+
+
+
+    var soloQueue = leagues?.FirstOrDefault(l => l.QueueType == "RANKED_SOLO_5x5");
+
+
+    var profile = new ProfileDto(
+        GameName: gameName,
+        TagLine: tagLine,
+        ProfileIconId: summoner.ProfileIconId,
+        SummonerLevel: summoner.SummonerLevel,
+        Tier: soloQueue?.Tier ?? "UNRANKED",
+        Rank: soloQueue?.Rank ?? "",
+        LeaguePoints: soloQueue?.LeaguePoints ?? 0
+    );
+
+    return Ok(profile);
+}
 }
