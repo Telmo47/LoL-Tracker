@@ -4,7 +4,7 @@ import axios from 'axios';
 
 export default function Dashboard() {
     const { gameName, tagLine } = useParams<{ gameName: string; tagLine: string }>();
-
+    
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [metrics, setMetrics] = useState<any | null>(null);
@@ -50,16 +50,16 @@ export default function Dashboard() {
                 <h2 style={{ fontSize: '1.8rem', color: '#f8fafc', marginBottom: '20px' }}>
                     Relatório de Suporte: <span style={{ color: '#38bdf8' }}>{gameName}#{tagLine}</span>
                 </h2>
-
+                
                 {isLoading && <p style={{ color: '#fbbf24' }}>A carregar dados da Riot... (pode demorar uns segundos)</p>}
                 {error && <p style={{ color: '#ef4444' }}>Erro: {error}</p>}
-
+                
                 {/* CARTÃO DE PERFIL */}
                 {profile && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', background: '#0f172a', padding: '20px', borderRadius: '10px', border: '1px solid #475569' }}>
-                        <img
-                            src={`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/profileicon/${profile.profileIconId}.png`}
-                            alt="Ícone de Perfil"
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', background: '#0f172a', padding: '20px', borderRadius: '10px', marginTop: '20px', border: '1px solid #475569' }}>
+                        <img 
+                            src={`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/profileicon/${profile.profileIconId}.png`} 
+                            alt="Ícone de Perfil" 
                             style={{ width: '100px', borderRadius: '50%', border: '3px solid #38bdf8' }}
                         />
                         <div>
@@ -77,22 +77,22 @@ export default function Dashboard() {
                         <h3 style={{ color: '#f8fafc', fontSize: '1.5rem', marginBottom: '15px' }}>Últimas Partidas (Suporte)</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                             {metrics.matchHistory.map((match: any) => (
-                                <div key={match.matchId} style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '20px',
-                                    padding: '15px',
-                                    background: match.win ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                                <div key={match.matchId} style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '20px', 
+                                    padding: '15px', 
+                                    background: match.win ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
                                     borderLeft: `5px solid ${match.win ? '#10b981' : '#ef4444'}`,
                                     borderRadius: '8px'
                                 }}>
-
-                                    <img
-                                        src={`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/champion/${match.championName}.png`}
-                                        alt={match.championName}
+                                    
+                                    <img 
+                                        src={`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/champion/${match.championName}.png`} 
+                                        alt={match.championName} 
                                         style={{ width: '60px', height: '60px', borderRadius: '50%', border: `2px solid ${match.win ? '#10b981' : '#ef4444'}` }}
                                     />
-
+                                    
                                     <div style={{ flex: 1 }}>
                                         <h4 style={{ margin: '0 0 5px 0', color: match.win ? '#34d399' : '#f87171' }}>
                                             {match.win ? 'VITÓRIA' : 'DERROTA'} <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>({match.gameDurationInMinutes} min)</span>
@@ -115,10 +115,11 @@ export default function Dashboard() {
                                     <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', width: '130px' }}>
                                         {match.items.map((itemId: number, idx: number) => (
                                             itemId > 0 ? (
-                                                <img
-                                                    key={idx}
-                                                    src={`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/item/${itemId}.png`}
-                                                    alt="Item"
+                                                <img 
+                                                    key={idx} 
+                                                    src={`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/item/${itemId}.png`} 
+                                                    alt="" 
+                                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
                                                     style={{ width: '35px', height: '35px', borderRadius: '4px', border: '1px solid #334155' }}
                                                 />
                                             ) : (

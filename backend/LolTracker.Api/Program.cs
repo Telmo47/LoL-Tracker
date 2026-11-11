@@ -47,8 +47,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseHttpsRedirection();
-
 // Ativar o CORS antes da autorização e controllers!
 app.UseCors("AllowReactApp");
 
