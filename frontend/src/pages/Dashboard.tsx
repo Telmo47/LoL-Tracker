@@ -4,7 +4,7 @@ import axios from 'axios';
 
 export default function Dashboard() {
     const { gameName, tagLine } = useParams<{ gameName: string; tagLine: string }>();
-    
+
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [metrics, setMetrics] = useState<any | null>(null);
@@ -50,16 +50,16 @@ export default function Dashboard() {
                 <h2 style={{ fontSize: '1.8rem', color: '#f8fafc', marginBottom: '20px' }}>
                     Relatório de Suporte: <span style={{ color: '#38bdf8' }}>{gameName}#{tagLine}</span>
                 </h2>
-                
+
                 {isLoading && <p style={{ color: '#fbbf24' }}>A carregar dados da Riot... (pode demorar uns segundos)</p>}
                 {error && <p style={{ color: '#ef4444' }}>Erro: {error}</p>}
-                
+
                 {/* CARTÃO DE PERFIL */}
                 {profile && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px', background: '#0f172a', padding: '20px', borderRadius: '10px', marginTop: '20px', border: '1px solid #475569' }}>
-                        <img 
-                            src={`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/profileicon/${profile.profileIconId}.png`} 
-                            alt="Ícone de Perfil" 
+                        <img
+                            src={`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/profileicon/${profile.profileIconId}.png`}
+                            alt="Ícone de Perfil"
                             style={{ width: '100px', borderRadius: '50%', border: '3px solid #38bdf8' }}
                         />
                         <div>
@@ -71,28 +71,142 @@ export default function Dashboard() {
                     </div>
                 )}
 
+                {/* PAINEL DE KPIS GLOBAIS */}
+                {metrics && (
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                        gap: '15px',
+                        marginTop: '25px'
+                    }}>
+                        {/* Cartão Winrate */}
+                        <div style={{ background: '#0f172a', padding: '20px', borderRadius: '10px', border: '1px solid #334155', textAlign: 'center' }}>
+                            <p style={{ margin: '0 0 5px 0', color: '#94a3b8', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Winrate Global</p>
+                            <p style={{ margin: 0, color: metrics.winRate >= 50 ? '#34d399' : '#f87171', fontSize: '1.5rem', fontWeight: 'bold' }}>
+                                {metrics.winRate}% <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>({metrics.totalGamesAnalyzed} jogos)</span>
+                            </p>
+                        </div>
+
+                        {/* Cartão VSPM (Visão) */}
+                        <div style={{ background: '#0f172a', padding: '20px', borderRadius: '10px', border: '1px solid #334155', textAlign: 'center' }}>
+                            <p style={{ margin: '0 0 5px 0', color: '#94a3b8', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>👁️ Visão (VSPM)</p>
+                            <p style={{ margin: 0, color: '#38bdf8', fontSize: '1.5rem', fontWeight: 'bold' }}>
+                                {metrics.avgVisionScorePerMinute} <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>/ min</span>
+                            </p>
+                        </div>
+
+                        {/* Cartão Kill Participation */}
+                        <div style={{ background: '#0f172a', padding: '20px', borderRadius: '10px', border: '1px solid #334155', textAlign: 'center' }}>
+                            <p style={{ margin: '0 0 5px 0', color: '#94a3b8', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🎯 Kill Participation</p>
+                            <p style={{ margin: 0, color: '#38bdf8', fontSize: '1.5rem', fontWeight: 'bold' }}>
+                                {metrics.avgKillParticipation}%
+                            </p>
+                        </div>
+
+                        {/* Cartão KDA */}
+                        <div style={{ background: '#0f172a', padding: '20px', borderRadius: '10px', border: '1px solid #334155', textAlign: 'center' }}>
+                            <p style={{ margin: '0 0 5px 0', color: '#94a3b8', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>⚔️ KDA Global</p>
+                            <p style={{ margin: 0, color: '#f8fafc', fontSize: '1.5rem', fontWeight: 'bold' }}>
+                                {metrics.avgKda}
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {/* RESUMO DE CAMPEÕES E SINERGIAS COM ADC */}
+                {metrics && (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '20px', marginTop: '30px' }}>
+
+                        {/* ESTATÍSTICAS POR CAMPEÃO DE SUPORTE */}
+                        <div style={{ background: '#1e293b', padding: '20px', borderRadius: '10px', border: '1px solid #334155' }}>
+                            <h3 style={{ color: '#f8fafc', fontSize: '1.2rem', marginBottom: '15px', borderBottom: '1px solid #334155', paddingBottom: '10px' }}>
+                                🛡️ Desempenho por Campeão (Suporte)
+                            </h3>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                {metrics.championStats.map((champ: any, idx: number) => (
+                                    <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#0f172a', padding: '10px 15px', borderRadius: '8px', border: '1px solid #334155' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                                            <img
+                                                src={`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/champion/${champ.championName}.png`}
+                                                alt={champ.championName}
+                                                style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #38bdf8' }}
+                                            />
+                                            <div>
+                                                <p style={{ margin: 0, color: '#f8fafc', fontWeight: 'bold' }}>{champ.championName}</p>
+                                                <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.85rem' }}>{champ.gamesPlayed} jogos ({champ.wins}V - {champ.gamesPlayed - champ.wins}D)</p>
+                                            </div>
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <p style={{ margin: 0, color: champ.winRate >= 50 ? '#34d399' : '#f87171', fontWeight: 'bold' }}>
+                                                {champ.winRate}% WR
+                                            </p>
+                                            <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.85rem' }}>
+                                                KDA: {champ.avgKda} | VSPM: {champ.avgVisionScorePerMinute}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* SINERGIAS COM O ADC */}
+                        <div style={{ background: '#1e293b', padding: '20px', borderRadius: '10px', border: '1px solid #334155' }}>
+                            <h3 style={{ color: '#f8fafc', fontSize: '1.2rem', marginBottom: '15px', borderBottom: '1px solid #334155', paddingBottom: '10px' }}>
+                                🏹 Sinergia com ADCs
+                            </h3>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                {metrics.adcSynergies.map((adc: any, idx: number) => (
+                                    <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#0f172a', padding: '10px 15px', borderRadius: '8px', border: '1px solid #334155' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                                            <img
+                                                src={`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/champion/${adc.adcChampionName}.png`}
+                                                alt={adc.adcChampionName}
+                                                style={{ width: '40px', height: '40px', borderRadius: '50%', border: '2px solid #f43f5e' }}
+                                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                            />
+                                            <div>
+                                                <p style={{ margin: 0, color: '#f8fafc', fontWeight: 'bold' }}>{adc.adcChampionName}</p>
+                                                <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.85rem' }}>{adc.gamesPlayed} partidas juntos</p>
+                                            </div>
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <p style={{ margin: 0, color: adc.winRate >= 50 ? '#34d399' : '#f87171', fontWeight: 'bold' }}>
+                                                {adc.winRate}% WR
+                                            </p>
+                                            <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.85rem' }}>
+                                                {adc.wins}V / {adc.losses}D
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                    </div>
+                )}
+
                 {/* HISTÓRICO DE PARTIDAS (ISSUE #11) */}
                 {metrics && (
                     <div style={{ marginTop: '30px' }}>
                         <h3 style={{ color: '#f8fafc', fontSize: '1.5rem', marginBottom: '15px' }}>Últimas Partidas (Suporte)</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                             {metrics.matchHistory.map((match: any) => (
-                                <div key={match.matchId} style={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    gap: '20px', 
-                                    padding: '15px', 
-                                    background: match.win ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
+                                <div key={match.matchId} style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '20px',
+                                    padding: '15px',
+                                    background: match.win ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
                                     borderLeft: `5px solid ${match.win ? '#10b981' : '#ef4444'}`,
                                     borderRadius: '8px'
                                 }}>
-                                    
-                                    <img 
-                                        src={`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/champion/${match.championName}.png`} 
-                                        alt={match.championName} 
+
+                                    <img
+                                        src={`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/champion/${match.championName}.png`}
+                                        alt={match.championName}
                                         style={{ width: '60px', height: '60px', borderRadius: '50%', border: `2px solid ${match.win ? '#10b981' : '#ef4444'}` }}
                                     />
-                                    
+
                                     <div style={{ flex: 1 }}>
                                         <h4 style={{ margin: '0 0 5px 0', color: match.win ? '#34d399' : '#f87171' }}>
                                             {match.win ? 'VITÓRIA' : 'DERROTA'} <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>({match.gameDurationInMinutes} min)</span>
@@ -115,10 +229,10 @@ export default function Dashboard() {
                                     <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', width: '130px' }}>
                                         {match.items.map((itemId: number, idx: number) => (
                                             itemId > 0 ? (
-                                                <img 
-                                                    key={idx} 
-                                                    src={`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/item/${itemId}.png`} 
-                                                    alt="" 
+                                                <img
+                                                    key={idx}
+                                                    src={`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/item/${itemId}.png`}
+                                                    alt=""
                                                     onError={(e) => { e.currentTarget.style.display = 'none'; }}
                                                     style={{ width: '35px', height: '35px', borderRadius: '4px', border: '1px solid #334155' }}
                                                 />
