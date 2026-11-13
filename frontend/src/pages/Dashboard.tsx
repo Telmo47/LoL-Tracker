@@ -1,9 +1,10 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 export default function Dashboard() {
     const { gameName, tagLine } = useParams<{ gameName: string; tagLine: string }>();
+    const navigate = useNavigate();
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -40,6 +41,37 @@ export default function Dashboard() {
         fetchMetrics();
     }, [gameName, tagLine]);
 
+    // 1. TRATAMENTO DE ERROS AMIGÁVEL (ISSUE #14)
+    if (error) {
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '80vh', padding: '20px' }}>
+                <div style={{ background: '#1e293b', padding: '40px', borderRadius: '12px', border: '1px solid #ef4444', textAlign: 'center', maxWidth: '500px' }}>
+                    <div style={{ fontSize: '3rem', marginBottom: '15px' }}>⚠️</div>
+                    <h2 style={{ color: '#f8fafc', marginBottom: '15px' }}>Invocador Não Encontrado</h2>
+                    <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '30px' }}>
+                        {error}
+                    </p>
+                    <button
+                        onClick={() => navigate('/')}
+                        style={{ padding: '10px 25px', borderRadius: '6px', border: 'none', background: '#0284c7', color: '#fff', fontWeight: 'bold', cursor: 'pointer', fontSize: '1rem' }}
+                    >
+                        Tentar Nova Pesquisa
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // 2. LOADING STATE
+    if (isLoading) {
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
+                <p style={{ color: '#38bdf8', fontSize: '1.2rem' }}>A carregar dados da Riot Games...</p>
+            </div>
+        );
+    }
+
+    // 3. RENDERIZAÇÃO NORMAL DO DASHBOARD
     return (
         <div style={{ padding: '30px 40px', maxWidth: '1400px', margin: '0 auto' }}>
             <Link to="/" style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: 'bold', display: 'inline-block', marginBottom: '20px' }}>
@@ -50,9 +82,6 @@ export default function Dashboard() {
                 <h2 style={{ fontSize: '1.8rem', color: '#f8fafc', marginBottom: '20px' }}>
                     Relatório de Suporte: <span style={{ color: '#38bdf8' }}>{gameName}#{tagLine}</span>
                 </h2>
-
-                {isLoading && <p style={{ color: '#fbbf24' }}>A carregar dados da Riot... (pode demorar uns segundos)</p>}
-                {error && <p style={{ color: '#ef4444' }}>Erro: {error}</p>}
 
                 {/* CARTÃO DE PERFIL */}
                 {profile && (
@@ -109,7 +138,7 @@ export default function Dashboard() {
                     </div>
                 )}
 
-                {/* LAYOUT PRINCIPAL EM DUAS COLUNAS (Estatísticas vs Histórico) */}
+                {/* LAYOUT PRINCIPAL EM DUAS COLUNAS */}
                 {metrics && (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '25px', alignItems: 'start' }}>
 
